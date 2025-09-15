@@ -1,84 +1,186 @@
 # Guest Management System (GMS)
 
-Hệ thống quản lý khách mời cho Lễ kỷ niệm 15 năm
+A comprehensive guest management system for the 15th Anniversary Celebration event.
 
-## Tổng quan
+## Overview
 
-Guest Management System (GMS) là một ứng dụng web toàn diện được thiết kế để quản lý khách mời cho các sự kiện, đặc biệt là Lễ kỷ niệm 15 năm. Hệ thống cung cấp các tính năng quản lý danh sách khách mời, gửi thiệp mời điện tử, theo dõi phản hồi RSVP và check-in tại sự kiện.
+The Guest Management System (GMS) is a full-stack web application designed to streamline guest management for events. It provides complete functionality for managing guest lists, sending digital invitations, tracking RSVP responses, and handling event check-ins through QR code technology.
 
-## Tính năng chính
+## Key Features
 
-### 🎯 Quản lý khách mời
-- Tạo và chỉnh sửa khách mời thủ công
-- Import danh sách từ file CSV
-- Phát hiện và hợp nhất khách mời trùng lặp
-- Xuất danh sách khách mời với trạng thái
+### 🎯 Guest Management
+- Create and edit guests manually
+- Import guest lists from CSV files
+- Export guest data with status information
+- Real-time guest statistics and filtering
 
-### 🎫 Thiệp mời và QR Code
-- Sinh mã QR duy nhất cho từng khách
-- Tạo đường link thiệp mời cá nhân hóa
-- Gửi thiệp mời qua email/SMS
-- Quản lý nội dung chương trình sự kiện
+### 🎫 QR Code & Invitations
+- Generate unique QR codes for each guest
+- Personalized invitation links
+- Digital invitation delivery
+- Event program information management
 
-### 📊 Theo dõi RSVP
-- Dashboard tổng quan trạng thái RSVP
-- Cập nhật RSVP thủ công và tự động
-- Báo cáo và phân tích chi tiết
-- Thiết lập hạn chót phản hồi
+### 📊 RSVP Tracking
+- Real-time RSVP dashboard
+- Manual and automatic RSVP updates
+- Detailed reporting and analytics
+- Response deadline management
 
-### ✅ Check-in sự kiện
-- Quét mã QR để check-in
-- Theo dõi check-in theo thời gian thực
-- Xử lý các ngoại lệ khi check-in
-- Giám sát sự kiện trực tuyến
+### ✅ Event Check-in
+- QR code scanning for check-in
+- Real-time check-in monitoring
+- Exception handling for check-in issues
+- Live event monitoring
 
-### 👥 Trải nghiệm khách mời
-- Xem thiệp mời cá nhân hóa
-- Gửi phản hồi tham gia/từ chối
-- Thay đổi quyết định trước hạn chót
-- Check-in nhanh chóng tại cổng
+### 👥 Guest Experience
+- View personalized invitations
+- Submit attendance responses
+- Update decisions before deadline
+- Quick check-in at event entrance
 
-## Cấu trúc tài liệu
+## Technology Stack
+
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: SQLite3
+- **Authentication**: JWT with bcrypt
+- **File Uploads**: Multer
+- **QR Generation**: qrcode library
+- **CSV Processing**: csv-parse
+- **Testing**: Jest + Supertest
+
+### Architecture
+- **Pattern**: Service Layer Architecture (Controllers → Services → Repositories)
+- **Module System**: CommonJS
+- **Database**: Custom repository pattern with SQLite
+
+## Quick Start
+
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
+
+### Installation
+```bash
+# Clone the repository
+git clone <repository-url>
+cd gms
+
+# Install backend dependencies
+cd backend
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
+
+# Initialize database
+npm run migrate
+
+# Start development server
+npm run dev
+```
+
+### Available Commands
+```bash
+# Development
+npm run dev          # Start with nodemon
+npm start           # Production start
+
+# Testing
+npm test            # Run all tests
+npm run test:watch  # Watch mode
+
+# Database
+npm run migrate     # Initialize/migrate database
+```
+
+## Project Structure
 
 ```
-docs/
-├── README.md              # Tài liệu tổng quan (file này)
-├── user-stories.md        # User stories chi tiết
-├── acceptance-criteria.md # Acceptance criteria
-├── api.md                # Tài liệu API
-└── installation.md       # Hướng dẫn cài đặt
+backend/
+├── src/
+│   ├── controllers/     # HTTP request handlers
+│   ├── services/        # Business logic
+│   ├── repositories/    # Data access layer
+│   ├── models/          # Data models
+│   ├── routes/          # Route definitions
+│   ├── middlewares/     # Custom middleware
+│   └── utils/           # Utility functions
+├── database/
+│   └── migrations/      # Database migrations
+├── uploads/             # File uploads
+└── tests/              # Test files
+docs/                   # Project documentation
 ```
 
-## Vai trò người dùng
+## API Endpoints
 
-### Ban tổ chức (ORG)
-- Quản lý danh sách khách mời
-- Tạo và gửi thiệp mời
-- Theo dõi phản hồi RSVP
-- Quản lý check-in tại sự kiện
-- Xem báo cáo và phân tích
+### Guest Management
+- `GET /api/v1/guests` - List guests with pagination/filtering
+- `POST /api/v1/guests` - Create new guest
+- `GET /api/v1/guests/:id` - Get guest details
+- `PUT /api/v1/guests/:id` - Update guest
+- `DELETE /api/v1/guests/:id` - Delete guest
+- `POST /api/v1/guests/import-csv` - Import from CSV
+- `GET /api/v1/guests/export-csv` - Export to CSV
 
-### Khách mời (GUEST)
-- Xem thiệp mời cá nhân
-- Gửi phản hồi tham dự
-- Thay đổi quyết định
-- Check-in tại sự kiện
+### RSVP Management
+- `GET /api/v1/rsvp/:guestId` - Get RSVP status
+- `POST /api/v1/rsvp/:guestId` - Submit RSVP response
 
-## Công nghệ sử dụng
+### Check-in Management
+- `POST /api/v1/checkin/:guestId` - Check-in guest
+- `GET /api/v1/checkin/stats` - Check-in statistics
 
-(Sẽ được cập nhật khi có thông tin chi tiết về stack công nghệ)
+### QR Code Management
+- `GET /api/v1/qr/:guestId` - Get QR code
+- `POST /api/v1/qr/generate` - Generate QR codes
 
-## Liên kết nhanh
+## User Roles
 
-- [📋 User Stories](docs/user-stories.md) - Các câu chuyện người dùng chi tiết
-- [✅ Acceptance Criteria](docs/acceptance-criteria.md) - Tiêu chí nghiệm thu
-- [🔧 API Documentation](docs/api.md) - Tài liệu API
-- [⚙️ Installation Guide](docs/installation.md) - Hướng dẫn cài đặt
+### Event Organizers (ORG)
+- Manage guest lists
+- Create and send invitations
+- Track RSVP responses
+- Monitor event check-ins
+- View reports and analytics
 
-## Đóng góp
+### Guests (GUEST)
+- View personalized invitations
+- Submit attendance responses
+- Update responses before deadline
+- Check-in at event venue
 
-Để đóng góp vào dự án, vui lòng đọc tài liệu hướng dẫn trong thư mục docs/ và tuân theo các quy tắc coding standards của dự án.
+## Documentation
 
-## Giấy phép
+- [📋 Requirements](docs/requirements.md) - Business requirements
+- [🏗️ Architecture](docs/v1.0/4c-model/) - System architecture
+- [🔧 API Documentation](docs/v1.0/api/) - API reference
+- [📊 Database Schema](docs/v1.0/erd/) - ERD and database design
+- [✅ Development Checklist](docs/v1.0/development-checklist.md) - Development progress
 
-[Thông tin giấy phép sẽ được cập nhật]
+## Development
+
+### Code Style
+- Use CommonJS (`require()`) for imports
+- Classes with PascalCase, methods with camelCase
+- Arrow functions for class methods
+- Structured error responses: `{ success: boolean, data/error: object, message: string }`
+
+### Error Handling
+- Always use try-catch in async methods
+- Log errors with `console.error('MethodName error:', error)`
+- Return consistent HTTP status codes (200, 201, 400, 404, 500)
+
+## Contributing
+
+1. Follow the existing code style and architecture patterns
+2. Write tests for new features
+3. Update documentation for API changes
+4. Use structured commit messages
+
+## License
+
+MIT License - see LICENSE file for details
