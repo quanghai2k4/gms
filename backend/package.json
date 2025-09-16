@@ -13,6 +13,14 @@
     "test:watch": "jest --watch",
     "migrate": "node database/migrations/init.js"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "testMatch": ["**/tests/**/*.test.js"],
+    "moduleNameMapper": {
+      "uuid": "<rootDir>/tests/__mocks__/uuid.js"
+    }
+  },
   "keywords": [
     "guest-management",
     "qr-code",
