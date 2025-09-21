@@ -11,6 +11,7 @@ gms/
 ├── docs/            # Tài liệu
 │   ├── requirement.md
 │   └── v1.0/        # Phân tích và thiết kế hệ thống
+├── gms.sh           # Script quản lý tổng hợp
 └── README.md
 ```
 
@@ -23,20 +24,25 @@ gms/
 
 ## Cài đặt và chạy
 
-### Scripts quản lý hệ thống
+### Script quản lý tổng hợp
+
+#### Hiển thị hướng dẫn
+```bash
+./gms.sh help
+```
 
 #### Khởi động hệ thống
 ```bash
-./start.sh
+./gms.sh start
 ```
 - Kiểm tra môi trường và dependencies
 - Khởi động backend server
-- Hiển thị đầy đủ thông tin truy cập với URL file:// cho frontend
+- Hiển thị đầy đủ thông tin truy cập localhost
 - Hiển thị thống kê realtime và hướng dẫn sử dụng
 
 #### Dừng hệ thống  
 ```bash
-./stop.sh
+./gms.sh stop
 ```
 - Dừng graceful server process
 - Kiểm tra và giải phóng port 3000
@@ -44,7 +50,7 @@ gms/
 
 #### Kiểm tra trạng thái
 ```bash
-./status.sh
+./gms.sh status
 ```
 - Kiểm tra backend server có đang chạy
 - Hiển thị thống kê khách mời realtime
@@ -53,10 +59,16 @@ gms/
 
 #### Chạy test
 ```bash
-./test.sh
+./gms.sh test
 ```
 - Test đầy đủ API endpoints
 - Kiểm tra workflow từ tạo guest đến check-in
+
+#### Khởi động lại hệ thống
+```bash
+./gms.sh restart
+```
+- Dừng và khởi động lại hệ thống
 
 ### Thủ công
 
@@ -108,6 +120,6 @@ http://localhost:3000/checkin
 
 ## Demo
 
-Chạy `./start.sh` và truy cập:
-- Admin: http://localhost:3000 → mở `frontend/index.html`
+Chạy `./gms.sh start` và truy cập:
+- Admin: http://localhost:3000/
 - Import mẫu: Dùng file `docs/sample-guests.csv`
