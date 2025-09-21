@@ -77,119 +77,118 @@ flowchart TD
 
 #### Level 1: System Context
 ```mermaid
-C4Context
-    title System Context - Guest Management System
+graph TB
+    Organizer[Event Organizers<br/>Manage guests, track RSVPs, monitor check-ins]
+    Guest[Invited Guests<br/>Receive invitations, respond to RSVPs]  
+    Staff[Event Staff<br/>Check-in guests at venue]
     
-    Person(organizer, "Event Organizers", "Manage guests, track RSVPs, monitor check-ins")
-    Person(guest, "Invited Guests", "Receive invitations, respond to RSVPs")
-    Person(staff, "Event Staff", "Check-in guests at venue")
+    GMS[Guest Management System<br/>Complete event guest lifecycle management]
     
-    System(gms, "Guest Management System", "Complete event guest lifecycle management")
+    Email[Email System<br/>Send digital invitations]
+    Print[Print Service<br/>Print invitations with QR codes]
     
-    System_Ext(email, "Email System", "Send digital invitations")
-    System_Ext(print, "Print Service", "Print invitations with QR codes")
+    Organizer --> GMS
+    Guest --> GMS
+    Staff --> GMS
     
-    Rel(organizer, gms, "Manages guests & QR codes")
-    Rel(guest, gms, "Access invitations & RSVP")
-    Rel(staff, gms, "Check-in attendees")
-    
-    Rel(gms, email, "Send invitation links")
-    Rel(gms, print, "Export QR codes for printing")
+    GMS --> Email
+    GMS --> Print
+```
 ```
 
 #### Level 2: Container Architecture
 ```mermaid
-C4Container
-    title Container Diagram - Guest Management System
+graph TB
+    Organizer[Event Organizers<br/>Manage guests, track RSVPs, monitor check-ins]
+    Guest[Invited Guests<br/>Receive invitations, respond to RSVPs]
+    Staff[Event Staff<br/>Check-in guests at venue]
     
-    Person(organizer, "Event Organizers")
-    Person(guest, "Invited Guests") 
-    Person(staff, "Event Staff")
+    subgraph "Guest Management System"
+        WebAdmin[Admin Dashboard<br/>HTML/CSS/JS<br/>Guest management interface for organizers]
+        WebRSVP[RSVP Portal<br/>HTML/CSS/JS<br/>Invitation and response page for guests]
+        WebCheckin[Check-in Interface<br/>HTML/CSS/JS<br/>Event check-in interface for staff]
+        API[REST API Server<br/>Node.js/Express<br/>Business logic and data processing]
+        DB[(SQLite Database<br/>SQLite<br/>Guest data, RSVPs, and check-in logs)]
+    end
     
-    Container_Boundary(gms, "Guest Management System") {
-        Container(web_admin, "Admin Dashboard", "HTML/CSS/JS", "Guest management interface for organizers")
-        Container(web_rsvp, "RSVP Portal", "HTML/CSS/JS", "Invitation and response page for guests")
-        Container(web_checkin, "Check-in Interface", "HTML/CSS/JS", "Event check-in interface for staff")
-        Container(api, "REST API Server", "Node.js/Express", "Business logic and data processing")
-        Container(db, "SQLite Database", "SQLite", "Guest data, RSVPs, and check-in logs")
-    }
+    Organizer --> WebAdmin
+    Guest --> WebRSVP
+    Staff --> WebCheckin
     
-    Rel(organizer, web_admin, "Manages via HTTPS")
-    Rel(guest, web_rsvp, "Accesses via HTTPS/QR")
-    Rel(staff, web_checkin, "Check-in via HTTPS")
-    
-    Rel(web_admin, api, "API calls", "HTTPS/JSON")
-    Rel(web_rsvp, api, "API calls", "HTTPS/JSON") 
-    Rel(web_checkin, api, "API calls", "HTTPS/JSON")
-    Rel(api, db, "SQL queries", "SQLite Driver")
+    WebAdmin --> API
+    WebRSVP --> API
+    WebCheckin --> API
+    API --> DB
+```
 ```
 
 #### Level 3: Component Architecture
 ```mermaid
-C4Component
-    title Component Diagram - REST API Server
+graph TB
+    subgraph "REST API Server"
+        Auth[Authentication Middleware<br/>Express.js<br/>QR code validation and access control]
+        Validation[Input Validation<br/>Express.js<br/>Request data validation and sanitization]
+        GuestCtrl[Guest Controller<br/>Express.js<br/>Guest management operations]
+        RSVPCtrl[RSVP Controller<br/>Express.js<br/>RSVP response handling]
+        CheckinCtrl[Check-in Controller<br/>Express.js<br/>Event check-in processing]
+        StatsCtrl[Statistics Controller<br/>Express.js<br/>Real-time analytics]
+        CSVService[CSV Service<br/>Node.js<br/>Bulk import processing]
+        QRService[QR Code Service<br/>Node.js<br/>QR code generation]
+        DBLayer[Database Layer<br/>SQLite3<br/>Data access abstraction]
+    end
     
-    Container_Boundary(api, "REST API Server") {
-        Component(auth, "Authentication Middleware", "Express.js", "QR code validation and access control")
-        Component(validation, "Input Validation", "Express.js", "Request data validation and sanitization")
-        Component(guestController, "Guest Controller", "Express.js", "Guest management operations")
-        Component(rsvpController, "RSVP Controller", "Express.js", "RSVP response handling")
-        Component(checkinController, "Check-in Controller", "Express.js", "Event check-in processing")
-        Component(statsController, "Statistics Controller", "Express.js", "Real-time analytics")
-        Component(csvService, "CSV Service", "Node.js", "Bulk import processing")
-        Component(qrService, "QR Code Service", "Node.js", "QR code generation")
-        Component(dbLayer, "Database Layer", "SQLite3", "Data access abstraction")
-    }
+    Frontend[Frontend Apps<br/>HTML/CSS/JS<br/>User interfaces]
+    Database[(SQLite Database<br/>SQLite<br/>Persistent data storage)]
     
-    Container(db, "SQLite Database", "SQLite", "Persistent data storage")
-    Container(frontend, "Frontend Apps", "HTML/CSS/JS", "User interfaces")
+    Frontend --> Auth
+    Auth --> Validation
+    Validation --> GuestCtrl
+    Validation --> RSVPCtrl
+    Validation --> CheckinCtrl
+    Validation --> StatsCtrl
     
-    Rel(frontend, auth, "Requests with QR codes")
-    Rel(auth, validation, "Validated requests")
-    Rel(validation, guestController, "Guest operations")
-    Rel(validation, rsvpController, "RSVP operations") 
-    Rel(validation, checkinController, "Check-in operations")
-    Rel(validation, statsController, "Statistics requests")
+    GuestCtrl --> CSVService
+    GuestCtrl --> QRService
+    GuestCtrl --> DBLayer
+    RSVPCtrl --> DBLayer
+    CheckinCtrl --> DBLayer
+    StatsCtrl --> DBLayer
     
-    Rel(guestController, csvService, "Bulk operations")
-    Rel(guestController, qrService, "QR generation")
-    Rel(guestController, dbLayer, "Guest data")
-    Rel(rsvpController, dbLayer, "RSVP data")
-    Rel(checkinController, dbLayer, "Check-in data")
-    Rel(statsController, dbLayer, "Statistics queries")
-    
-    Rel(dbLayer, db, "SQL operations")
+    DBLayer --> Database
 ```
 
-#### Level 4: Code Architecture
+#### Level 4: Code Architecture - Guest Controller Implementation
 ```mermaid
-C4Code
-    title Code Diagram - Guest Controller Implementation
+graph TB
+    subgraph "Guest Controller Functions"
+        CreateGuest[createGuest&#40;&#41;<br/>POST /api/guests<br/>Create new guest with validation]
+        GetAllGuests[getAllGuests&#40;&#41;<br/>GET /api/guests<br/>Retrieve all guests with pagination]
+        GetGuestByQR[getGuestByQR&#40;&#41;<br/>GET /api/guests/qr/:code<br/>Find guest by QR code]
+        UpdateGuest[updateGuest&#40;&#41;<br/>PUT /api/guests/:id<br/>Update guest information]
+        DeleteGuest[deleteGuest&#40;&#41;<br/>DELETE /api/guests/:id<br/>Remove guest record]
+        ImportCSV[importCSV&#40;&#41;<br/>POST /api/guests/import<br/>Bulk CSV import]
+    end
     
-    Component_Boundary(guestController, "Guest Controller") {
-        Code(createGuest, "createGuest()", "Function", "POST /api/guests - Create new guest with validation")
-        Code(getAllGuests, "getAllGuests()", "Function", "GET /api/guests - Retrieve all guests with pagination")
-        Code(getGuestByQR, "getGuestByQR()", "Function", "GET /api/guests/qr/:code - Find guest by QR code")
-        Code(updateGuest, "updateGuest()", "Function", "PUT /api/guests/:id - Update guest information")
-        Code(deleteGuest, "deleteGuest()", "Function", "DELETE /api/guests/:id - Remove guest record")
-        Code(importCSV, "importCSV()", "Function", "POST /api/guests/import - Bulk CSV import")
-    }
+    InputValidator[Input Validator<br/>Class<br/>validateGuest&#40;&#41;, sanitizeInput&#40;&#41;]
+    QRService[QR Service<br/>Class<br/>generateQR&#40;&#41;, validateQR&#40;&#41;]
+    DBLayer[Database Layer<br/>Class<br/>CRUD operations with prepared statements]
     
-    Component(validation, "Input Validator", "Class", "validateGuest(), sanitizeInput()")
-    Component(qrService, "QR Service", "Class", "generateQR(), validateQR()")
-    Component(dbLayer, "Database Layer", "Class", "CRUD operations with prepared statements")
+    CreateGuest --> InputValidator
+    CreateGuest --> QRService
+    CreateGuest --> DBLayer
     
-    Rel(createGuest, validation, "validate(guestData)")
-    Rel(createGuest, qrService, "generateQR()")
-    Rel(createGuest, dbLayer, "insertGuest()")
+    GetAllGuests --> DBLayer
+    GetGuestByQR --> InputValidator
+    GetGuestByQR --> DBLayer
     
-    Rel(getAllGuests, dbLayer, "selectAllGuests()")
-    Rel(getGuestByQR, validation, "validateQRFormat()")
-    Rel(getGuestByQR, dbLayer, "selectByQRCode()")
+    UpdateGuest --> InputValidator
+    UpdateGuest --> DBLayer
     
-    Rel(importCSV, validation, "validateCSVRow()")
-    Rel(importCSV, qrService, "generateBulkQR()")
-    Rel(importCSV, dbLayer, "bulkInsert()")
+    DeleteGuest --> DBLayer
+    
+    ImportCSV --> InputValidator
+    ImportCSV --> QRService
+    ImportCSV --> DBLayer
 ```
 
 ### Database Schema
