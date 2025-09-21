@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiệp mời - Lễ kỷ niệm 15 năm</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .invitation-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .invitation-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .invitation-header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .invitation-header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .invitation-body {
+            padding: 40px 30px;
+        }
+        
+        .guest-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .guest-name {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .guest-details {
+            color: #666;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+        
+        .event-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .event-details h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .event-info {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .event-info div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .event-info .icon {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .rsvp-section {
+            text-align: center;
+        }
+        
+        .rsvp-question {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .rsvp-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .btn-accept {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-accept:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .btn-decline {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-decline:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
+        .response-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .response-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .response-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-card {
+            text-align: center;
+            padding: 40px 30px;
+        }
+        
+        .error-card h2 {
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 600px) {
+            .invitation-card {
+                margin: 10px;
+            }
+            
+            .invitation-header {
+                padding: 30px 20px;
+            }
+            
+            .invitation-header h1 {
+                font-size: 1.8em;
+            }
+            
+            .invitation-body {
+                padding: 30px 20px;
+            }
+            
+            .rsvp-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invitation-card">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Đang tải thông tin thiệp mời...</p>
+        </div>
+        
+        <div id="content" style="display: none;">
+            <div class="invitation-header">
+                <h1>🎉 Lễ Kỷ Niệm</h1>
+                <p>15 năm thành lập công ty</p>
+            </div>
+            
+            <div class="invitation-body">
+                <div class="guest-info">
+                    <div class="guest-name" id="guestName">-</div>
+                    <div class="guest-details" id="guestDetails">-</div>
+                </div>
+                
+                <div class="event-details">
+                    <h3>🌟 Chi tiết sự kiện</h3>
+                    <div class="event-info">
+                        <div>
+                            <span class="icon">📅</span>
+                            <span>Thời gian: 19:00, Thứ 7, ngày 30/12/2023</span>
+                        </div>
+                        <div>
+                            <span class="icon">📍</span>
+                            <span>Địa điểm: Khách sạn Grand Plaza, TP.HCM</span>
+                        </div>
+                        <div>
+                            <span class="icon">🍽️</span>
+                            <span>Tiệc tối & chương trình văn nghệ</span>
+                        </div>
+                        <div>
+                            <span class="icon">🎁</span>
+                            <span>Trang phục: Formal (Vest/Áo dài)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="rsvp-section" id="rsvpSection">
+                    <div class="rsvp-question">
+                        Bạn có thể tham gia sự kiện này không?
+                    </div>
+                    <div class="rsvp-buttons">
+                        <button class="btn btn-accept" onclick="submitRSVP('ACCEPTED')">
+                            ✅ Tôi sẽ tham gia
+                        </button>
+                        <button class="btn btn-decline" onclick="submitRSVP('DECLINED')">
+                            ❌ Tôi không thể tham gia
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="responseMessage" class="response-message">
+                    <!-- Response message will appear here -->
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorContent" style="display: none;">
+            <div class="invitation-header">
+                <h1>❌ Lỗi</h1>
+            </div>
+            <div class="error-card">
+                <h2>Không tìm thấy thông tin</h2>
+                <p>QR code không hợp lệ hoặc đã hết hạn.</p>
+                <p>Vui lòng liên hệ ban tổ chức để được hỗ trợ.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentGuest = null;
+
+        // Get QR code from URL parameter
+        function getQRFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('qr');
+        }
+
+        // Load guest information
+        async function loadGuest() {
+            const qrCode = getQRFromURL();
+            
+            if (!qrCode) {
+                showError();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/guests/qr/${qrCode}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    currentGuest = result.data;
+                    displayGuest(result.data);
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error loading guest:', error);
+                showError();
+            }
+        }
+
+        // Display guest information
+        function displayGuest(guest) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            
+            document.getElementById('guestName').textContent = guest.name;
+            
+            let details = [];
+            if (guest.position) details.push(guest.position);
+            if (guest.organization) details.push(guest.organization);
+            if (guest.phone) details.push(guest.phone);
+            
+            document.getElementById('guestDetails').textContent = details.join(' • ');
+            
+            // Check if guest has already responded
+            if (guest.status !== 'PENDING') {
+                showAlreadyResponded(guest.status);
+            }
+        }
+
+        // Show error state
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('errorContent').style.display = 'block';
+        }
+
+        // Show already responded message
+        function showAlreadyResponded(status) {
+            const rsvpSection = document.getElementById('rsvpSection');
+            const statusText = status === 'ACCEPTED' ? 'đã xác nhận tham gia' : 'đã từ chối tham gia';
+            const emoji = status === 'ACCEPTED' ? '✅' : '❌';
+            
+            rsvpSection.innerHTML = `
+                <div class="response-message response-success" style="display: block;">
+                    <h3>${emoji} Cảm ơn bạn!</h3>
+                    <p>Bạn ${statusText} sự kiện này.</p>
+                    ${status === 'ACCEPTED' ? '<p><strong>Chúng tôi rất mong được gặp bạn tại sự kiện!</strong></p>' : '<p>Chúng tôi rất tiếc vì bạn không thể tham gia.</p>'}
+                </div>
+            `;
+        }
+
+        // Submit RSVP response
+        async function submitRSVP(response) {
+            if (!currentGuest) return;
+            
+            // Disable buttons to prevent double submission
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            try {
+                const apiResponse = await fetch(`${API_BASE}/rsvp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        qr_code: currentGuest.qr_code,
+                        response: response
+                    })
+                });
+
+                const result = await apiResponse.json();
+                
+                if (result.success) {
+                    showResponseMessage(response, true);
+                } else {
+                    showResponseMessage(response, false, result.error);
+                    // Re-enable buttons on error
+                    buttons.forEach(btn => btn.disabled = false);
+                }
+            } catch (error) {
+                console.error('Error submitting RSVP:', error);
+                showResponseMessage(response, false, 'Lỗi kết nối mạng');
+                // Re-enable buttons on error
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        // Show response message
+        function showResponseMessage(response, success, errorMessage = '') {
+            const messageDiv = document.getElementById('responseMessage');
+            const rsvpSection = document.getElementById('rsvpSection');
+            
+            if (success) {
+                const statusText = response === 'ACCEPTED' ? 'xác nhận tham gia' : 'từ chối tham gia';
+                const emoji = response === 'ACCEPTED' ? '✅' : '❌';
+                
+                messageDiv.className = 'response-message response-success';
+                messageDiv.innerHTML = `
+                    <h3>${emoji} Cảm ơn bạn!</h3>
+                    <p>Bạn đã ${statusText} sự kiện thành công.</p>
+                    ${response === 'ACCEPTED' ? '<p><strong>Chúng tôi rất mong được gặp bạn tại sự kiện!</strong></p>' : '<p>Chúng tôi rất tiếc vì bạn không thể tham gia.</p>'}
+                `;
+                messageDiv.style.display = 'block';
+                
+                // Hide RSVP buttons
+                rsvpSection.style.display = 'none';
+            } else {
+                messageDiv.className = 'response-message response-error';
+                messageDiv.innerHTML = `
+                    <h3>❌ Lỗi</h3>
+                    <p>Không thể gửi phản hồi: ${errorMessage}</p>
+                    <p>Vui lòng thử lại sau.</p>
+                `;
+                messageDiv.style.display = 'block';
+            }
+        }
+
+        // Load guest data when page loads
+        document.addEventListener('DOMContentLoaded', loadGuest);
+    </script>
+</body>
+</html>

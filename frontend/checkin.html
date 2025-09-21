@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-in - GMS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .check-in-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .scanner-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .qr-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .qr-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .qr-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5a67d8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .guest-info {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .guest-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-declined {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-checked-in {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .message-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .message-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .recent-checkins {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .checkin-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .checkin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .checkin-item:last-child {
+            border-bottom: none;
+        }
+        
+        .checkin-name {
+            font-weight: 500;
+        }
+        
+        .checkin-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            .qr-input-group {
+                flex-direction: column;
+            }
+            
+            .guest-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Check-in Khách Mời</h1>
+            <p>Quét QR code để check-in khách mời tại sự kiện</p>
+        </div>
+
+        <div class="check-in-card">
+            <div class="stats-grid" id="stats">
+                <!-- Stats will be loaded here -->
+            </div>
+
+            <div class="scanner-section">
+                <h3>Quét QR Code</h3>
+                <div class="qr-input-group">
+                    <input type="text" 
+                           id="qrInput" 
+                           class="qr-input" 
+                           placeholder="Quét QR code hoặc nhập mã thủ công"
+                           autocomplete="off">
+                    <button class="btn btn-primary" onclick="lookupGuest()">Tìm kiếm</button>
+                </div>
+                <p style="color: #666; font-size: 0.9em;">
+                    Hướng camera vào QR code hoặc nhập mã thủ công
+                </p>
+            </div>
+
+            <div id="message" class="message"></div>
+
+            <div id="guestInfo" class="guest-info">
+                <h4>Thông tin khách mời</h4>
+                <div class="guest-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Họ tên</span>
+                        <span class="detail-value" id="guestName">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Chức vụ</span>
+                        <span class="detail-value" id="guestPosition">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Tổ chức</span>
+                        <span class="detail-value" id="guestOrganization">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Số điện thoại</span>
+                        <span class="detail-value" id="guestPhone">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Trạng thái</span>
+                        <span class="detail-value" id="guestStatus">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Check-in</span>
+                        <span class="detail-value" id="guestCheckin">-</span>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="checkinBtn" class="btn btn-success" onclick="performCheckin()">
+                        ✅ Check-in khách mời
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-checkins">
+            <h3>Check-in gần đây</h3>
+            <div class="checkin-list" id="recentCheckins">
+                <!-- Recent check-ins will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        let currentGuest = null;
+        let recentCheckins = [];
+
+        // Auto-focus on QR input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('qrInput').focus();
+            loadStats();
+            loadRecentCheckins();
+            
+            // Auto-submit when QR code is scanned (usually ends with Enter)
+            document.getElementById('qrInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    lookupGuest();
+                }
+            });
+            
+            // Refresh stats every 30 seconds
+            setInterval(loadStats, 30000);
+        });
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const stats = result.data;
+                    document.getElementById('stats').innerHTML = `
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.total_guests}</div>
+                            <div class="stat-label">Tổng khách mời</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.accepted}</div>
+                            <div class="stat-label">Đã xác nhận</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.checked_in}</div>
+                            <div class="stat-label">Đã check-in</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${stats.accepted - stats.checked_in}</div>
+                            <div class="stat-label">Chưa check-in</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function lookupGuest() {
+            const qrCode = document.getElementById('qrInput').value.trim();
+            
+            if (!qrCode) {
+                showMessage('Vui lòng nhập mã QR', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/guests/qr/${qrCode}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    currentGuest = result.data;
+                    displayGuestInfo(result.data);
+                    hideMessage();
+                } else {
+                    showMessage('Không tìm thấy khách mời với mã QR này', 'error');
+                    hideGuestInfo();
+                }
+            } catch (error) {
+                console.error('Error looking up guest:', error);
+                showMessage('Lỗi kết nối. Vui lòng thử lại.', 'error');
+                hideGuestInfo();
+            }
+        }
+
+        function displayGuestInfo(guest) {
+            document.getElementById('guestName').textContent = guest.name;
+            document.getElementById('guestPosition').textContent = guest.position || '-';
+            document.getElementById('guestOrganization').textContent = guest.organization || '-';
+            document.getElementById('guestPhone').textContent = guest.phone || '-';
+            
+            // Status
+            const statusElement = document.getElementById('guestStatus');
+            const statusText = getStatusText(guest.status);
+            statusElement.innerHTML = `<span class="status-badge status-${guest.status.toLowerCase()}">${statusText}</span>`;
+            
+            // Check-in status
+            const checkinElement = document.getElementById('guestCheckin');
+            if (guest.checked_in) {
+                checkinElement.innerHTML = '<span class="status-badge status-checked-in">✅ Đã check-in</span>';
+            } else {
+                checkinElement.innerHTML = '<span class="status-badge status-pending">⏳ Chưa check-in</span>';
+            }
+            
+            // Check-in button
+            const checkinBtn = document.getElementById('checkinBtn');
+            if (guest.checked_in) {
+                checkinBtn.textContent = '✅ Đã check-in';
+                checkinBtn.className = 'btn btn-success';
+                checkinBtn.disabled = true;
+            } else if (guest.status !== 'ACCEPTED') {
+                checkinBtn.textContent = '❌ Chưa xác nhận tham gia';
+                checkinBtn.className = 'btn btn-danger';
+                checkinBtn.disabled = true;
+            } else {
+                checkinBtn.textContent = '✅ Check-in khách mời';
+                checkinBtn.className = 'btn btn-success';
+                checkinBtn.disabled = false;
+            }
+            
+            document.getElementById('guestInfo').style.display = 'block';
+        }
+
+        function hideGuestInfo() {
+            document.getElementById('guestInfo').style.display = 'none';
+            currentGuest = null;
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'PENDING': return 'Chờ phản hồi';
+                case 'ACCEPTED': return 'Đã xác nhận';
+                case 'DECLINED': return 'Từ chối';
+                default: return status;
+            }
+        }
+
+        async function performCheckin() {
+            if (!currentGuest || currentGuest.checked_in) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/checkin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        qr_code: currentGuest.qr_code,
+                        checkin_by: 'Admin'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage(`Check-in thành công cho ${currentGuest.name}!`, 'success');
+                    currentGuest.checked_in = true;
+                    displayGuestInfo(currentGuest);
+                    loadStats();
+                    loadRecentCheckins();
+                    
+                    // Clear input and focus for next scan
+                    setTimeout(() => {
+                        document.getElementById('qrInput').value = '';
+                        document.getElementById('qrInput').focus();
+                        hideGuestInfo();
+                        hideMessage();
+                    }, 2000);
+                } else {
+                    showMessage('Lỗi check-in: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error performing check-in:', error);
+                showMessage('Lỗi kết nối. Vui lòng thử lại.', 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message message-${type}`;
+            messageDiv.style.display = 'block';
+        }
+
+        function hideMessage() {
+            document.getElementById('message').style.display = 'none';
+        }
+
+        async function loadRecentCheckins() {
+            try {
+                const response = await fetch(`${API_BASE}/guests`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const checkedInGuests = result.data
+                        .filter(guest => guest.checked_in)
+                        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+                        .slice(0, 10);
+                    
+                    const recentCheckinsDiv = document.getElementById('recentCheckins');
+                    
+                    if (checkedInGuests.length === 0) {
+                        recentCheckinsDiv.innerHTML = '<p style="text-align: center; color: #666;">Chưa có check-in nào</p>';
+                        return;
+                    }
+                    
+                    recentCheckinsDiv.innerHTML = checkedInGuests.map(guest => `
+                        <div class="checkin-item">
+                            <div>
+                                <div class="checkin-name">${guest.name}</div>
+                                <div style="font-size: 0.9em; color: #666;">
+                                    ${guest.position ? guest.position + ' - ' : ''}${guest.organization || ''}
+                                </div>
+                            </div>
+                            <div class="checkin-time">
+                                ${formatTime(guest.updated_at)}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading recent check-ins:', error);
+            }
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html>

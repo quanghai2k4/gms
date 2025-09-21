@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMS - Quản lý khách mời</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5a67d8;
+        }
+        
+        .btn-secondary {
+            background-color: #gray;
+            color: white;
+            margin-left: 10px;
+        }
+        
+        .guests-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .status-pending { color: #ff9500; }
+        .status-accepted { color: #28a745; }
+        .status-declined { color: #dc3545; }
+        .status-checked-in { color: #17a2b8; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: black;
+        }
+        
+        .qr-code {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .qr-code img {
+            max-width: 200px;
+        }
+        
+        .file-input {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Guest Management System</h1>
+            <p>Hệ thống quản lý khách mời - Lễ kỷ niệm 15 năm thành lập</p>
+        </div>
+
+        <div class="stats" id="stats">
+            <!-- Stats will be loaded here -->
+        </div>
+
+        <div class="controls">
+            <h3>Thêm khách mời mới</h3>
+            <form id="guestForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Họ tên *</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Chức vụ</label>
+                        <input type="text" id="position">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tổ chức/Công ty</label>
+                        <input type="text" id="organization">
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại</label>
+                        <input type="text" id="phone">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Thêm khách mời</button>
+            </form>
+
+            <hr style="margin: 20px 0;">
+
+            <h3>Import từ CSV</h3>
+            <div class="file-input">
+                <input type="file" id="csvFile" accept=".csv" />
+                <button type="button" class="btn btn-secondary" onclick="importCSV()">Import CSV</button>
+            </div>
+            <small>File CSV cần có các cột: name, position, organization, phone</small>
+        </div>
+
+        <div class="guests-table">
+            <table id="guestsTable">
+                <thead>
+                    <tr>
+                        <th>Họ tên</th>
+                        <th>Chức vụ</th>
+                        <th>Tổ chức</th>
+                        <th>Số ĐT</th>
+                        <th>Trạng thái</th>
+                        <th>Check-in</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Guests will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>QR Code thiệp mời</h2>
+            <div class="qr-code" id="qrCodeContent">
+                <!-- QR code will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadGuests();
+        });
+
+        // Add guest form handler
+        document.getElementById('guestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const guestData = {
+                name: document.getElementById('name').value,
+                position: document.getElementById('position').value,
+                organization: document.getElementById('organization').value,
+                phone: document.getElementById('phone').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/guests`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(guestData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Thêm khách mời thành công!');
+                    document.getElementById('guestForm').reset();
+                    loadGuests();
+                    loadStats();
+                } else {
+                    alert('Lỗi: ' + result.error);
+                }
+            } catch (error) {
+                alert('Lỗi kết nối: ' + error.message);
+            }
+        });
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const stats = result.data;
+                    document.getElementById('stats').innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.total_guests}</div>
+                            <div>Tổng khách mời</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.accepted}</div>
+                            <div>Đã xác nhận</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.declined}</div>
+                            <div>Từ chối</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.pending}</div>
+                            <div>Chờ phản hồi</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.checked_in}</div>
+                            <div>Đã check-in</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadGuests() {
+            try {
+                const response = await fetch(`${API_BASE}/guests`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const tbody = document.querySelector('#guestsTable tbody');
+                    tbody.innerHTML = result.data.map(guest => `
+                        <tr>
+                            <td>${guest.name}</td>
+                            <td>${guest.position || '-'}</td>
+                            <td>${guest.organization || '-'}</td>
+                            <td>${guest.phone || '-'}</td>
+                            <td><span class="status-${guest.status.toLowerCase()}">${getStatusText(guest.status)}</span></td>
+                            <td>${guest.checked_in ? '✅ Đã check-in' : '⏳ Chưa check-in'}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="showQRCode('${guest.qr_code}')">QR Code</button>
+                                <button class="btn btn-secondary" onclick="checkinGuest('${guest.qr_code}')">Check-in</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading guests:', error);
+            }
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'PENDING': return 'Chờ phản hồi';
+                case 'ACCEPTED': return 'Đã xác nhận';
+                case 'DECLINED': return 'Từ chối';
+                default: return status;
+            }
+        }
+
+        async function showQRCode(qrCode) {
+            try {
+                const response = await fetch(`${API_BASE}/qrcode/${qrCode}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('qrCodeContent').innerHTML = `
+                        <img src="${result.qrCode}" alt="QR Code" />
+                        <p><strong>Link:</strong> <a href="${result.url}" target="_blank">${result.url}</a></p>
+                        <p>Khách mời quét QR code này để phản hồi tham gia sự kiện</p>
+                    `;
+                    document.getElementById('qrModal').style.display = 'block';
+                }
+            } catch (error) {
+                alert('Lỗi tạo QR code: ' + error.message);
+            }
+        }
+
+        async function checkinGuest(qrCode) {
+            if (!confirm('Xác nhận check-in khách mời?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/checkin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        qr_code: qrCode,
+                        checkin_by: 'Admin'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Check-in thành công!');
+                    loadGuests();
+                    loadStats();
+                } else {
+                    alert('Lỗi: ' + result.error);
+                }
+            } catch (error) {
+                alert('Lỗi kết nối: ' + error.message);
+            }
+        }
+
+        async function importCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Vui lòng chọn file CSV');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csvFile', file);
+
+            try {
+                const response = await fetch(`${API_BASE}/guests/import`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`Import thành công ${result.imported} khách mời!`);
+                    fileInput.value = '';
+                    loadGuests();
+                    loadStats();
+                } else {
+                    alert('Lỗi import: ' + result.error);
+                }
+            } catch (error) {
+                alert('Lỗi kết nối: ' + error.message);
+            }
+        }
+
+        // Modal close handler
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('qrModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
