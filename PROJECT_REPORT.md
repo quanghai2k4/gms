@@ -124,6 +124,74 @@ C4Container
     Rel(api, db, "SQL queries", "SQLite Driver")
 ```
 
+#### Level 3: Component Architecture
+```mermaid
+C4Component
+    title Component Diagram - REST API Server
+    
+    Container_Boundary(api, "REST API Server") {
+        Component(auth, "Authentication Middleware", "Express.js", "QR code validation and access control")
+        Component(validation, "Input Validation", "Express.js", "Request data validation and sanitization")
+        Component(guestController, "Guest Controller", "Express.js", "Guest management operations")
+        Component(rsvpController, "RSVP Controller", "Express.js", "RSVP response handling")
+        Component(checkinController, "Check-in Controller", "Express.js", "Event check-in processing")
+        Component(statsController, "Statistics Controller", "Express.js", "Real-time analytics")
+        Component(csvService, "CSV Service", "Node.js", "Bulk import processing")
+        Component(qrService, "QR Code Service", "Node.js", "QR code generation")
+        Component(dbLayer, "Database Layer", "SQLite3", "Data access abstraction")
+    }
+    
+    Container(db, "SQLite Database", "SQLite", "Persistent data storage")
+    Container(frontend, "Frontend Apps", "HTML/CSS/JS", "User interfaces")
+    
+    Rel(frontend, auth, "Requests with QR codes")
+    Rel(auth, validation, "Validated requests")
+    Rel(validation, guestController, "Guest operations")
+    Rel(validation, rsvpController, "RSVP operations") 
+    Rel(validation, checkinController, "Check-in operations")
+    Rel(validation, statsController, "Statistics requests")
+    
+    Rel(guestController, csvService, "Bulk operations")
+    Rel(guestController, qrService, "QR generation")
+    Rel(guestController, dbLayer, "Guest data")
+    Rel(rsvpController, dbLayer, "RSVP data")
+    Rel(checkinController, dbLayer, "Check-in data")
+    Rel(statsController, dbLayer, "Statistics queries")
+    
+    Rel(dbLayer, db, "SQL operations")
+```
+
+#### Level 4: Code Architecture
+```mermaid
+C4Code
+    title Code Diagram - Guest Controller Implementation
+    
+    Component_Boundary(guestController, "Guest Controller") {
+        Code(createGuest, "createGuest()", "Function", "POST /api/guests - Create new guest with validation")
+        Code(getAllGuests, "getAllGuests()", "Function", "GET /api/guests - Retrieve all guests with pagination")
+        Code(getGuestByQR, "getGuestByQR()", "Function", "GET /api/guests/qr/:code - Find guest by QR code")
+        Code(updateGuest, "updateGuest()", "Function", "PUT /api/guests/:id - Update guest information")
+        Code(deleteGuest, "deleteGuest()", "Function", "DELETE /api/guests/:id - Remove guest record")
+        Code(importCSV, "importCSV()", "Function", "POST /api/guests/import - Bulk CSV import")
+    }
+    
+    Component(validation, "Input Validator", "Class", "validateGuest(), sanitizeInput()")
+    Component(qrService, "QR Service", "Class", "generateQR(), validateQR()")
+    Component(dbLayer, "Database Layer", "Class", "CRUD operations with prepared statements")
+    
+    Rel(createGuest, validation, "validate(guestData)")
+    Rel(createGuest, qrService, "generateQR()")
+    Rel(createGuest, dbLayer, "insertGuest()")
+    
+    Rel(getAllGuests, dbLayer, "selectAllGuests()")
+    Rel(getGuestByQR, validation, "validateQRFormat()")
+    Rel(getGuestByQR, dbLayer, "selectByQRCode()")
+    
+    Rel(importCSV, validation, "validateCSVRow()")
+    Rel(importCSV, qrService, "generateBulkQR()")
+    Rel(importCSV, dbLayer, "bulkInsert()")
+```
+
 ### Database Schema
 ```mermaid
 erDiagram
